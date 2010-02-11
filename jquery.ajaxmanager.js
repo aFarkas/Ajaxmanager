@@ -128,8 +128,8 @@
 				if(o.cacheResponse && cache[id]){
 					that.requests[id] = {};
 					setTimeout(function(){
-						that._complete.call(that, o.context || o, origCom, null, 'success', id, o);
-						that._success.call(that, o.context || o, origSuc, cache[id], 'success', null, o);
+						that._complete.call(that, o.context || o, origCom, {}, 'success', id, o);
+						that._success.call(that, o.context || o, origSuc, cache[id], 'success', {}, o);
 					}, 0);
 				} else {
 					that.requests[id] = $.ajax(o);
@@ -149,7 +149,7 @@
 			delete this.requests[xhrID];
 		},
 		_isAbort: function(xhr, o){
-			var ret = !!( o.abortIsNoSuccess && ( (xhr && xhr.readyState === 0) || (!xhr && !cache[o.xhrID]) ) );
+			var ret = !!( o.abortIsNoSuccess && ( !xhr || xhr.readyState === 0 || this.lastAbort === o.xhrID ) );
 			xhr = null;
 			return ret;
 		},
@@ -169,10 +169,10 @@
 			if(!this.inProgress){
 				$.event.trigger(this.name +'AjaxStop');
 			}
-			
 			xhr = null;
 		},
 		_success: function(context, origFn, data, status, xhr, o){
+			var that = this;
 			if(this._isAbort(xhr, o)){
 				xhr = null;
 				return;
@@ -183,7 +183,9 @@
 						return false;
 					}
 					if(abortXhr && abortXhr.abort){
+						that.lastAbort = name;
 						abortXhr.abort();
+						that.lastAbort = false;
 					}
 					abortXhr = null;
 				});
@@ -213,13 +215,14 @@
 				inProgress: this.inProgress
 			};
 		},
-		getData: this.getXHR,
 		abort: function(id){
-			var xhr;
+			var xhr, that = this;
 			if(id){
 				xhr = this.getData(id);
 				if(xhr && xhr.abort){
+					this.lastAbort = id;
 					xhr.abort();
+					this.lastAbort = false;
 				} else {
 					$(document).queue(
 						this.qName, $.grep($(document).queue(this.qName), function(fn, i){
@@ -227,11 +230,15 @@
 						})
 					);
 				}
+				xhr = null;
 				return;
 			}
 			$.each(this.requests, function(id, xhr){
 				if(xhr && xhr.abort){
+					that.lastAbort = id;
 					xhr.abort();
+					that.lastAbort = false;
+					xhr = null;
 				}
 			});
 		},
@@ -242,7 +249,7 @@
 			}
 		}
 	};
-	
+	$.manageAjax._manager.prototype.getXHR = $.manageAjax._manager.prototype.getData;
 	$.manageAjax.defaults = {
 		complete: $.noop,
 		success: $.noop,

@@ -160,7 +160,7 @@
 	<li>abort: (function): callback, that will be called, if a XHR is aborted.</li>
     <li>maxRequests: (number (<strong>1</strong>)) limits the number of simultaneous request in the queue. queue-option must be true or 'clear'.</li>
     <li>preventDoubbleRequests (<strong>true</strong>|false): prevents multiple equal requests (compares url, data and type)</li>
-	<li>cacheResponse (true|<strong>false</strong>): caches the response data of succesfull responses</li>
+	<li>cacheResponse (true|<strong>false</strong>): caches the response data of succesfull responses (not the xhr-object!)</li>
 	<li>domCompleteTrigger (<strong>false</strong>| DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMComplete" on the specified element.</li>
 	<li>domSuccessTrigger (<strong>false</strong> | DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMSuccess" on the specified element.</li>
 </ul>
@@ -261,32 +261,28 @@ $.manageAjax.add('clearQueue', {
 		<tr>
 			<th>complete (local)</th>
 			<td>
-				xhr, status, options
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+				xhr*, status, options
 			</td>
 			<td>enhanced: the options arguments is additionally passed.</td>
 		</tr>
 		<tr>
 			<th>managerName + 'AjaxComplete' (global)</th>
 			<td>
-				event, xhr, status, options
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+				event, xhr*, status, options
 			</td>
 			<td>new</td>
 		</tr>
 		<tr>
 			<th>managerName + 'DOMComplete' (DOM-Event)</th>
 			<td>
-				event, xhr, status, options
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+				event, xhr*, status, options
 			</td>
 			<td>new</td>
 		</tr>
 		<tr>
 			<th>success (local)</th>
 			<td>
-				data, textStatus, xhr, options
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+				data, textStatus, xhr*, options
 			</td>
 			<td>enhanced: the options arguments is additionally passed.</td>
 		</tr>
@@ -294,7 +290,7 @@ $.manageAjax.add('clearQueue', {
 			<th>managerName + 'AjaxSuccess' (global)</th>
 			<td>
 				event, xhr, options, data
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be an empty object.</small></p>
 			</td>
 			<td>new</td>
 		</tr>
@@ -314,6 +310,7 @@ $.manageAjax.add('clearQueue', {
 		</tr>
 	</tbody>
 </table>
+<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be an empty object.</small></p>
 <h2 id="demo">Demo:</h2>
 <p>Tip: Open your Firebug-Console, log the XHR´s and click around.</p>
 <div id="region1">
