@@ -1,0 +1,360 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>jQuery: AJAX Queue/Cache/Abort/Block Manager</title>
+        <link rel="stylesheet" href="../../css/layout.css" type="text/css" media="screen, projection">
+		
+        <style type="text/css">
+            #wrapper div {
+                border: 1px solid #000;
+                padding: 10px;
+                margin: 10px;
+            }
+        </style>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+        <script src="../../js/jquery.chili.pack.js" type="text/javascript"></script>
+        <script type="text/javascript"> 
+            ChiliBook.recipeFolder     = "../../css/chili/";  
+            ChiliBook.stylesheetFolder = "../../css/chili/";  
+        </script> 
+        <script src="jquery.ajaxmanager.js"></script>
+		
+        <script type="text/javascript">
+            $(function(){
+				if(!window.console){
+					window.console = {
+						log: function(){}
+					};
+				}
+				$(document).bind('queueAjaxStart', function(e){
+					console.log('queueAjaxStart');
+				});
+				$(document).bind('queueAjaxStop', function(e, data){
+					console.log('queueAjaxStop');
+				});
+				
+				$(document).bind('lifoAjaxStop', function(e){
+					console.log('lifoStop');
+				});
+				
+				
+				var a = $.manageAjax.create('queue', {queue: true});
+				
+                $('#region1 a').click(function(e){
+                   var $this = $(this);
+				   e.preventDefault();
+                   a.add({
+                      success: function(html) {
+						  $this.parent('div').find('ul').append('<li>'+html+'</li>');
+                      },
+                      url: $this.attr('href')
+                   });
+                   return false;
+                });
+                $('#region1 button')
+					.filter('.abort')
+					.click(function(){
+						a.abort();
+					})
+					.end()
+					.filter('.clear')
+					.click(function(){
+						a.clear();
+					})
+					.end()
+					.filter('.clear-abort')
+					.click(function(){
+						a.clear(true);
+					});
+               
+                $.manageAjax.create('lifo', {queue: 'clear', maxRequests: 2, abortOld: true});
+                $('#region2 a').click(function(){
+                   var $this = $(this);
+                   $.manageAjax.add('lifo', {
+                      success: function(html) {
+                          $this.parent('div').find('ul').append('<li>'+html+'</li>');
+                      },
+                      url: $this.attr('href')
+                   });
+                   return false;
+                });
+                $('#region2 button')
+					.filter('.abort')
+					.click(function(){
+						$.manageAjax.abort('lifo');
+					})
+					.end()
+					.filter('.clear')
+					.click(function(){
+						$.manageAjax.clear('lifo');
+					})
+					.end()
+					.filter('.clear-abort')
+					.click(function(){
+						$.manageAjax.clear('lifo', true);
+					});
+                
+                $('#region3 a').click(function(){
+                   var $this = $(this);
+                   $.manageAjax.add('lifo-cache', {
+						queue: 'clear', 
+						cacheResponse: true,
+						success: function(html) {
+							$this.parent('div').find('ul').append('<li>'+html+'</li>');
+						},
+						url: $this.attr('href')
+                   });
+                   return false;
+                });
+				
+                $('#region3 button')
+					.filter('.abort')
+					.click(function(){
+						$.manageAjax.abort('lifo-cache');
+					})
+					.end()
+					.filter('.clear')
+					.click(function(){
+						$.manageAjax.clear('lifo-cache');
+					})
+					.end()
+					.filter('.clear-abort')
+					.click(function(){
+						$.manageAjax.clear('lifo-cache', true);
+					});
+                
+                var d = $.manageAjax.create('cache', {queue: false, cacheResponse: true, preventDoubbleRequests: false});
+                $('#region4 a').click(function(){
+                   var $this = $(this);
+                   d.add({
+                      success: function(html) {
+                          $this.parent('div').find('ul').append('<li>'+html+'</li>');
+                      },
+
+                      abort: function(i){
+                          $this.parent('div').find('ul').append('<li style="color: red">'+i+' aborted</li>');
+                      },
+                      url: $this.attr('href')
+                   });
+                   return false;
+                });
+                $('#region4 button').click(function(){
+                    d.abort();
+                });
+                
+             });
+        </script>
+	</head>
+	<body>
+	    <div id="wrapper">
+<h1>AJAX Queue/Cache/Abort/Block Manager v. 3.0 (Beta)</h1>
+<p>Helps you to manage AJAX requests and responses (i.e. abort requests, block requests, order requests). It is inspired by the <a href="http://jquery.com/plugins/project/ajaxqueue">AJAX Queue Plugin</a> and the <a href="http://docs.jquery.com/AjaxQueue">AjaxQueue document</a> in the jQuery-Wiki.</p>
+<h2>$.manageAjax.create (uniqueName, options)</h2>
+<p>Creates a new ajaxmanager and returns it. Takes a list of options:</p>
+<ul>
+    <li><a href="http://docs.jquery.com/Ajax/jQuery.ajax#options">normal jQuery-Ajax-Options</a></li>
+    <li>queue: (true|<strong>false</strong>|'clear') the queue-type specifies the queue-behaviour. The clear option clears the queue, before it adds a new ajax-task to the queue (similiar to: last in first out)
+    <li>abortOld (true|<strong>false</strong>): aborts all "older" requests, if there is a response to a newer request</li>
+	<li>abortIsNoSuccess: (<strong>true</strong>|false): jQuery 1.4 calls the success-callback, if an XHR was aborted. If this option is set to true. Only the complete - callback will be called with status 'abort'.</li>
+	<li>abort: (function): callback, that will be called, if a XHR is aborted.</li>
+    <li>maxRequests: (number (<strong>1</strong>)) limits the number of simultaneous request in the queue. queue-option must be true or 'clear'.</li>
+    <li>preventDoubbleRequests (<strong>true</strong>|false): prevents multiple equal requests (compares url, data and type)</li>
+	<li>cacheResponse (true|<strong>false</strong>): caches the response data of succesfull responses</li>
+	<li>domCompleteTrigger (<strong>false</strong>| DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMComplete" on the specified element.</li>
+	<li>domSuccessTrigger (<strong>false</strong> | DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMSuccess" on the specified element.</li>
+</ul>
+<p>Your constructed ajaxmanager knows the following methods:</p>
+<ul>
+    
+    <li>add: ([uniqueName], options) returns an id of your XHR object and takes the following options: 
+        <ul>
+            <li><a href="http://docs.jquery.com/Ajax/jQuery.ajax#options">normal jQuery-Ajax-Options</a></li>
+            <li>'beforeCreate' ([function]): a function that will be called, before the XHR-object is created. If you return false, the XHR won´t be created.</li>
+        </ul>
+    </li>
+	<li>clear: ([uniqueName], [shouldAbort: true|<strong>false</strong>]) Clears the ajax queue of waiting requests. If the second parameter is true, all requests in proccess will be aborted, too.</li>
+    <li>abort: ([uniqueName], [id]) Aborts all managed XHR-requests. If you pass the optional index number of your XHR object only this XHR will be aborted.</li>
+	<li>getXHR: ([uniqueName], id) Returns the XHR-Object, if it is already constructed or the queue-function</li>
+</ul>
+<h3>Note:</h3>
+<p>First you have to construct/configure a new Ajaxmanager<p>
+<code class="javascript">//create an ajaxmanager named someAjaxProfileName
+var someManagedAjax = $.manageAjax.create('someAjaxProfileName', {
+	queue: true, 
+	cacheResponse: true
+});
+</code></p>
+
+<p>You have two different ways to call your methods (don´t mix them).</p>
+
+<h4>Calling Ajaxmanager with uniqueName</h4>
+<code class="javascript">//and add an ajaxrequest 
+$.manageAjax.add('someAjaxProfileName', {
+  success: function(html) {
+      $('ul').append('&lt;li&gt;'+html+'&lt;/li&gt;');
+  },
+  url: 'test.html'
+});</code></p>
+
+<h4>Calling Ajaxmanager with the returned ajaxmanger-Object</h4>
+<code class="javascript">//and add an ajaxrequest with the returned object
+$.manageAjax.add({
+  success: function(html) {
+      $('ul').append('&lt;li&gt;'+html+'&lt;/li&gt;');
+  },
+  url: 'test.html'
+});</code></p>
+
+<h3>Example:</h3>
+<p>
+<code class="javascript">//create an ajaxmanager named cacheQueue
+var ajaxManager = $.manageAjax.create('cacheQueue', {
+	queue: true, 
+	cacheResponse: true
+});
+//and add an ajaxrequest with the returned object
+ajaxManager.add({
+  success: function(html) {
+      $('ul').append('&lt;li&gt;'+html+'&lt;/li&gt;');
+  },
+  url: 'test.html'
+});</code></p>
+<p>or only with the uniqueName parameter</p>
+<p>
+<code class="javascript">//generate an ajaxmanger named clearQueue
+$.manageAjax.create('clearQueue', {queue: 'clear', maxRequests: 2});
+//and add an ajaxrequest with the name parameter
+$.manageAjax.add('clearQueue', {
+  success: function(html) {
+      $('ul').append('&lt;li&gt;'+html+'&lt;/li&gt;');
+  },
+  url: 'test.html'
+});</code></p>
+<h2 id="events">Events/Callbacks:</h2>
+<p>The ajaxmanager adds some new events or enhances some existing callbacks.</p>
+<table>
+	<thead>
+		<tr>
+			<th>name</th>
+			<th>arguments</th>
+			<th>new/enhanced</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+		<tr>
+			<th>beforeCreate (local)</th>
+			<td>XHR-ID, options</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>beforeSend (local)</th>
+			<td>XMLHttpRequest, options</td>
+			<td>enhanced: options arguments is passed</td>
+		</tr>
+		<tr>
+			<th>managerName + 'AjaxStart' (global)</th>
+			<td>event</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>complete (local)</th>
+			<td>
+				xhr, status, options
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+			</td>
+			<td>enhanced: the options arguments is additionally passed.</td>
+		</tr>
+		<tr>
+			<th>managerName + 'AjaxComplete' (global)</th>
+			<td>
+				event, xhr, status, options
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>managerName + 'DOMComplete' (DOM-Event)</th>
+			<td>
+				event, xhr, status, options
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>success (local)</th>
+			<td>
+				data, textStatus, xhr, options
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+			</td>
+			<td>enhanced: the options arguments is additionally passed.</td>
+		</tr>
+		<tr>
+			<th>managerName + 'AjaxSuccess' (global)</th>
+			<td>
+				event, xhr, options, data
+				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be null.</small></p>
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>managerName + 'DOMSuccess' (DOM-Event)</th>
+			<td>
+				event, data, options
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>managerName + 'AjaxStop' (global)</th>
+			<td>
+				event
+			</td>
+			<td>new</td>
+		</tr>
+	</tbody>
+</table>
+<h2 id="demo">Demo:</h2>
+<p>Tip: Open your Firebug-Console, log the XHR´s and click around.</p>
+<div id="region1">
+    <h2>{queue: true}</h2>
+    <ul></ul>
+    <a href="0.html">0 secound delay</a> | <a href="1.php">1 secound delay</a> | <a href="2.php">2 secounds delay</a> | <a href="3.php">3 secounds delay</a> | 
+	<button class="clear">clear</button> <button class="abort">abort</button> <button class="clear-abort">clear + abort</button> 
+</div>
+<div id="region2" class="box">
+    <h2>{queue: 'clear', maxRequests: 2, abortOld: true}</h2>
+    <ul></ul>
+    <a href="0.html">0 second delay</a> | <a href="1.php">1 second delay</a> | <a href="2.php">2 seconds delay</a> | <a href="3.php">3 secounds delay</a> |
+	<button class="clear">clear</button> <button class="abort">abort</button> <button class="clear-abort">clear + abort</button> 
+</div>
+<div id="region3">
+    <h2>{queue: 'clear', cacheResponse: true}</h2>
+    <ul></ul>
+    <a href="0.html">0 second delay</a> | <a href="1.php">1 second delay</a> | <a href="2.php">2 seconds delay</a> | <a href="3.php">3 secounds delay</a> | 
+	<button class="clear">clear</button> <button class="abort">abort</button> <button class="clear-abort">clear + abort</button> 
+</div>
+<div id="region4" class="box">
+    <h2>{queue: false, cacheResponse: true, preventDoubbleRequests: false}</h2>
+    <ul></ul>
+    <a href="0.html">0 second delay</a> | <a href="1.php">1 second delay</a> | <a href="2.php">2 seconds delay</a> | <a href="3.php">3 secounds delay</a> | 
+	<button class="abort">abort</button>
+</div>
+<p>If you find bugs please report them!!!</p>
+<h2 id="project">Project Site &amp; Bugtracker</h2>
+<ul>
+	<li><a href="http://plugins.jquery.com/project/AjaxManager">ajaxmanager Project Site</a></li>
+</ul>
+<h2 id="download">Download</h2>
+<ul>
+    <li><a href="jquery.ajaxmanager.js">ajaxmanager Download</a></li>
+</ul>
+<h2 id="licenses">Licenses</h2>
+<ul>
+    <li><a href="http://jquery.com/dev/svn/trunk/jquery/MIT-LICENSE.txt" target="_blank">MIT License</a></li>
+    <li><a href="http://jquery.com/dev/svn/trunk/jquery/GPL-LICENSE.txt" target="_blank">GPL License</a></li>
+</ul>
+<p><a href="/">Back to protofunc</a></p>
+        </div>
+	</body>
+</html>
