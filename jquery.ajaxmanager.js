@@ -1,7 +1,7 @@
 /**!
  * ajaxmanager: http://plugins.jquery.com/project/AjaxManager
  * @author Alexander Farkas
- * @version 3.0 RC
+ * @version 3.0 RC2
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -106,7 +106,6 @@
 				ahr = null;
 			};
 			
-			
 			if(o.queue === 'clear'){
 				$(document).clearQueue(this.qName);
 			}
@@ -159,13 +158,14 @@
 				o.abort.call(context, xhr, status, o);
 			}
 			origFn.call(context, xhr, status, o);
-			this._removeXHR(xhrID);
 			
 			$.event.trigger(this.name +'AjaxComplete', [xhr, status, o]);
 			
 			if(o.domCompleteTrigger){
 				$(o.domCompleteTrigger).trigger(this.name +'DOMComplete', [xhr, status, o]);
 			}
+			
+			this._removeXHR(xhrID);
 			if(!this.inProgress){
 				$.event.trigger(this.name +'AjaxStop');
 			}
@@ -178,16 +178,11 @@
 				return;
 			}
 			if(o.abortOld){
-				$.each(this.requests, function(name, abortXhr){
+				$.each(this.requests, function(name){
 					if(name === o.xhrID){
 						return false;
 					}
-					if(abortXhr && abortXhr.abort){
-						that.lastAbort = name;
-						abortXhr.abort();
-						that.lastAbort = false;
-					}
-					abortXhr = null;
+					that.abort(name);
 				});
 			}
 			if(o.cacheResponse && !cache[o.xhrID]){
@@ -202,12 +197,13 @@
 		},
 		getData: function(id){
 			if( id ){
-				return this.requests[id] || (this.opts.queue) ? 
-					$.grep($(document).queue(this.qName), function(fn, i){
+				var ret = this.requests[id];
+				if(!ret && this.opts.queue) {
+					ret = $.grep($(document).queue(this.qName), function(fn, i){
 						return (fn.xhrID === id);
-					})[0] : 
-					false
-				;
+					})[0];
+				}
+				return ret;
 			}
 			return {
 				requests: this.requests,
@@ -219,6 +215,7 @@
 			var xhr, that = this;
 			if(id){
 				xhr = this.getData(id);
+				
 				if(xhr && xhr.abort){
 					this.lastAbort = id;
 					xhr.abort();
@@ -233,13 +230,9 @@
 				xhr = null;
 				return;
 			}
-			$.each(this.requests, function(id, xhr){
-				if(xhr && xhr.abort){
-					that.lastAbort = id;
-					xhr.abort();
-					that.lastAbort = false;
-					xhr = null;
-				}
+			
+			$.each(this.requests, function(id){
+				that.abort(id);
 			});
 		},
 		clear: function(shouldAbort){
