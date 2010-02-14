@@ -1,7 +1,7 @@
 /**!
  * ajaxmanager: http://plugins.jquery.com/project/AjaxManager
  * @author Alexander Farkas
- * @version 3.0 RC2
+ * @version 3.0
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -65,10 +65,9 @@
 				ajaxFn 		= this._createAjax(xhrID, o, origSuc, origCom)
 			;
 			
-			if(this.requests[xhrID] && o.prevenDoubbleRequests){
+			if(this.requests[xhrID] && o.preventDoubbleRequests){
 				return;
 			}
-			
 			ajaxFn.xhrID = xhrID;
 			o.xhrID = xhrID;
 			
@@ -212,7 +211,7 @@
 			};
 		},
 		abort: function(id){
-			var xhr, that = this;
+			var xhr;
 			if(id){
 				xhr = this.getData(id);
 				
@@ -231,7 +230,13 @@
 				return;
 			}
 			
+			var that 	= this,
+				ids 	= []
+			;
 			$.each(this.requests, function(id){
+				ids.push(id);
+			});
+			$.each(ids, function(i, id){
 				that.abort(id);
 			});
 		},
@@ -254,7 +259,7 @@
 		cacheResponse: false,
 		domCompleteTrigger: false,
 		domSuccessTrigger: false,
-		prevenDoubbleRequests: true,
+		preventDoubbleRequests: true,
 		queue: false // true, false, clear
 	};
 	
