@@ -1,5 +1,6 @@
 /**!
- * ajaxmanager: http://plugins.jquery.com/project/AjaxManager
+ * project-site: http://plugins.jquery.com/project/AjaxManager
+ * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
  * @version 3.0
  * Copyright 2010, Alexander Farkas
