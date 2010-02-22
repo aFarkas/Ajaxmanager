@@ -2,28 +2,12 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.0
+ * @version 3.01
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
 
 (function($){
-	
-	//this can be deleted if jQuery 1.4.2 is out
-	$.support.ajax = !!(window.XMLHttpRequest);
-	if(window.ActiveXObject){
-		try{
-			new ActiveXObject("Microsoft.XMLHTTP");
-			$.support.ajax = true;
-		} catch(e){
-			if(window.XMLHttpRequest){
-				$.ajaxSetup({xhr: function(){
-					return new XMLHttpRequest();
-				}});
-			}
-		}
-	}
-	
 	var managed = {},
 		cache   = {}
 	;
