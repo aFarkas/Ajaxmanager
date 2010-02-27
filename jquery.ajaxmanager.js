@@ -146,7 +146,10 @@
 			$.event.trigger(this.name +'AjaxComplete', [xhr, status, o]);
 			
 			if(o.domCompleteTrigger){
-				$(o.domCompleteTrigger).trigger(this.name +'DOMComplete', [xhr, status, o]);
+				$(o.domCompleteTrigger)
+					.trigger(this.name +'DOMComplete', [xhr, status, o])
+					.trigger('DOMComplete', [xhr, status, o])
+				;
 			}
 			
 			this._removeXHR(xhrID);
@@ -175,7 +178,10 @@
 			origFn.call(context, data, status, xhr, o);
 			$.event.trigger(this.name +'AjaxSuccess', [xhr, o, data]);
 			if(o.domSuccessTrigger){
-				$(o.domSuccessTrigger).trigger(this.name +'DOMSuccess', [data, o]);
+				$(o.domSuccessTrigger)
+					.trigger(this.name +'DOMSuccess', [data, o])
+					.trigger('DOMSuccess', [data, o])
+				;
 			}
 			xhr = null;
 		},

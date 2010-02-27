@@ -158,11 +158,12 @@
     <li>abortOld (true|<strong>false</strong>): aborts all "older" requests, if there is a response to a newer request</li>
 	<li>abortIsNoSuccess: (<strong>true</strong>|false): jQuery 1.4 calls the success-callback, if an XHR was aborted. If this option is set to true. Only the complete - callback will be called with status 'abort'.</li>
 	<li>abort: (function): callback, that will be called, if a XHR is aborted.</li>
+	<li>beforeCreate ([function]): a function that will be called, before the XHR-object is created. If you return false, the XHR won�t be created.</li>
     <li>maxRequests: (number (<strong>1</strong>)) limits the number of simultaneous request in the queue. queue-option must be true or 'clear'.</li>
     <li>preventDoubbleRequests (<strong>true</strong>|false): prevents multiple equal requests (compares url, data and type)</li>
 	<li>cacheResponse (true|<strong>false</strong>): caches the response data of succesfull responses (not the xhr-object!)</li>
-	<li>domCompleteTrigger (<strong>false</strong>| DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMComplete" on the specified element.</li>
-	<li>domSuccessTrigger (<strong>false</strong> | DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the event uniqueName + "DOMSuccess" on the specified element.</li>
+	<li>domCompleteTrigger (<strong>false</strong>| DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the events uniqueName + "DOMComplete" and "DOMComplete"  on the specified element.</li>
+	<li>domSuccessTrigger (<strong>false</strong> | DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the events uniqueName + "DOMSuccess" and "DOMSuccess" on the specified element.</li>
 </ul>
 <p>Your constructed ajaxmanager knows the following methods:</p>
 <ul>
@@ -170,7 +171,7 @@
     <li>add: ([uniqueName], options) returns an id of your XHR object and takes the following options: 
         <ul>
             <li><a href="http://docs.jquery.com/Ajax/jQuery.ajax#options">normal jQuery-Ajax-Options</a></li>
-            <li>'beforeCreate' ([function]): a function that will be called, before the XHR-object is created. If you return false, the XHR won´t be created.</li>
+            <li>all additional ajaxmanager options, but not 'maxRequests' and 'queue'.</li>
         </ul>
     </li>
 	<li>clear: ([uniqueName], [shouldAbort: true|<strong>false</strong>]) Clears the ajax queue of waiting requests. If the second parameter is true, all requests in proccess will be aborted, too.</li>
@@ -273,7 +274,14 @@ $.manageAjax.add('clearQueue', {
 			<td>new</td>
 		</tr>
 		<tr>
-			<th>managerName + 'DOMComplete' (DOM-Event)</th>
+			<th>managerName + 'DOMComplete' (DOM-Event**)</th>
+			<td>
+				event, xhr*, status, options
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>'DOMComplete' (DOM-Event**)</th>
 			<td>
 				event, xhr*, status, options
 			</td>
@@ -290,12 +298,18 @@ $.manageAjax.add('clearQueue', {
 			<th>managerName + 'AjaxSuccess' (global)</th>
 			<td>
 				event, xhr, options, data
-				<p><small>Note: If the cacheResponse - option is true, the xhr-argument can be an empty object.</small></p>
 			</td>
 			<td>new</td>
 		</tr>
 		<tr>
-			<th>managerName + 'DOMSuccess' (DOM-Event)</th>
+			<th>managerName + 'DOMSuccess' (DOM-Event**)</th>
+			<td>
+				event, data, options
+			</td>
+			<td>new</td>
+		</tr>
+		<tr>
+			<th>'DOMSuccess' (DOM-Event**)</th>
 			<td>
 				event, data, options
 			</td>
@@ -311,6 +325,7 @@ $.manageAjax.add('clearQueue', {
 	</tbody>
 </table>
 <p><small>*Note: If the cacheResponse - option is true, the xhr-argument can be an empty object.</small></p>
+<p><small>**Note: You need to configure 'domCompleteTrigger' / 'domSuccessTrigger' to trigger these events.</small></p>
 <h2 id="demo">Demo:</h2>
 <p>Tip: Open your Firebug-Console, log the XHR´s and click around.</p>
 <div id="region1">
