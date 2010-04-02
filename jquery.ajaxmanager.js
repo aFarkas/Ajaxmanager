@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.01
+ * @version 3.02
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -76,15 +76,18 @@
 						
 			//always add some error callback
 			o.error =  function(ahr, status, errorStr){
-				ahr = (ahr || {});
-				var httpStatus 	= ahr.status,
-					content 	= ahr.responseXML || ahr.responseText
+				var httpStatus 	= '',
+					content 	= ''
 				;
+				if(status !== 'timeout' && ahr){
+					httpStatus = ahr.status;
+					content = ahr.responseXML || ahr.responseText;
+				}
 				if(origError) {
 					origError.call(this, ahr, status, errorStr, o);
 				} else {
 					setTimeout(function(){
-						throw status + ':: status: ' + httpStatus + ' | URL: ' + o.url + ' | data: '+ strData + ' | thrown: '+ errorStr + ' | response: '+ content;
+						throw status + '| status: ' + httpStatus + ' | URL: ' + o.url + ' | data: '+ strData + ' | thrown: '+ errorStr + ' | response: '+ content;
 					}, 0);
 				}
 				ahr = null;
