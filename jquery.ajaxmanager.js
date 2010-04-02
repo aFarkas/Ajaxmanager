@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.01
+ * @version 3.03
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -76,15 +76,18 @@
 						
 			//always add some error callback
 			o.error =  function(ahr, status, errorStr){
-				ahr = (ahr || {});
-				var httpStatus 	= ahr.status,
-					content 	= ahr.responseXML || ahr.responseText
+				var httpStatus 	= '',
+					content 	= ''
 				;
+				if(status !== 'timeout' && ahr){
+					httpStatus = ahr.status;
+					content = ahr.responseXML || ahr.responseText;
+				}
 				if(origError) {
 					origError.call(this, ahr, status, errorStr, o);
 				} else {
 					setTimeout(function(){
-						throw status + ':: status: ' + httpStatus + ' | URL: ' + o.url + ' | data: '+ strData + ' | thrown: '+ errorStr + ' | response: '+ content;
+						throw status + '| status: ' + httpStatus + ' | URL: ' + o.url + ' | data: '+ strData + ' | thrown: '+ errorStr + ' | response: '+ content;
 					}, 0);
 				}
 				ahr = null;
@@ -108,6 +111,9 @@
 			return function(){
 				if(o.beforeCreate.call(o.context || that, id, o) === false){return;}
 				that.inProgress++;
+				if(that.inProgress === 1){
+					$.event.trigger(that.name +'AjaxStart');
+				}
 				if(o.cacheResponse && cache[id]){
 					that.requests[id] = {};
 					setTimeout(function(){
@@ -115,10 +121,11 @@
 						that._success.call(that, o.context || o, origSuc, cache[id], 'success', {}, o);
 					}, 0);
 				} else {
-					that.requests[id] = $.ajax(o);
-				}
-				if(that.inProgress === 1){
-					$.event.trigger(that.name +'AjaxStart');
+					if (o.async) {
+						that.requests[id] = $.ajax(o);
+					} else {
+						$.ajax(o);
+					}
 				}
 				return id;
 			};
