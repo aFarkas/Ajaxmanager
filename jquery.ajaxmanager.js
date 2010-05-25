@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.03
+ * @version 3.04
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -17,8 +17,17 @@
 			return managed[name];
 		}
 		
+		function destroy(name){
+			if(managed[name]){
+				managed[name].clear(true);
+				delete managed[name];
+			}
+		}
+
+		
 		var publicFns = {
-			create: create
+			create: create,
+			destroy: destroy
 		};
 		
 		return publicFns;
