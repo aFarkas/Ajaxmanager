@@ -31,7 +31,7 @@
 		this.qName = name;
 		
 		this.opts = $.extend({}, $.ajaxSettings, $.manageAjax.defaults, opts);
-		if(opts.queue && opts.queue !== true && typeof opts.queue === 'string' && opts.queue !== 'clear'){
+		if(opts && opts.queue && opts.queue !== true && typeof opts.queue === 'string' && opts.queue !== 'clear'){
 			this.qName = opts.queue;
 		}
 	};
