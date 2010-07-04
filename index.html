@@ -27,6 +27,7 @@
 						log: function(){}
 					};
 				}
+				
 				$(document).bind('queueAjaxStart', function(e){
 					console.log('queueAjaxStart');
 				});
@@ -39,7 +40,7 @@
 				});
 				
 				
-				var a = $.manageAjax.create('queue', {queue: true, timeout: 500});
+				var a = $.manageAjax.create('queue', {queue: true});
 				
                 $('#region1 a').click(function(e){
                    var $this = $(this);

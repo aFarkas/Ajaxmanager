@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.04
+ * @version 3.05RC
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -49,10 +49,10 @@
 		add: function(o){
 			o = $.extend({}, this.opts, o);
 			
-			var origCom		= o.complete,
-				origSuc		= o.success,
-				beforeSend	= o.beforeSend,
-				origError 	= o.error,
+			var origCom		= o.complete || $.noop,
+				origSuc		= o.success || $.noop,
+				beforeSend	= o.beforeSend || $.noop,
+				origError 	= o.error || $.noop,
 				strData 	= (typeof o.data == 'string') ? o.data : $.param(o.data || {}),
 				xhrID 		= o.type + o.url + strData,
 				that 		= this,
@@ -256,9 +256,6 @@
 	};
 	$.manageAjax._manager.prototype.getXHR = $.manageAjax._manager.prototype.getData;
 	$.manageAjax.defaults = {
-		complete: $.noop,
-		success: $.noop,
-		beforeSend: $.noop,
 		beforeCreate: $.noop,
 		abort: $.noop,
 		abortIsNoSuccess: true,
