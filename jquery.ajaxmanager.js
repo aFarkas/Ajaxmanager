@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.05
+ * @version 3.06RC
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -126,8 +126,8 @@
 				if(o.cacheResponse && cache[id]){
 					that.requests[id] = {};
 					setTimeout(function(){
-						that._complete.call(that, o.context || o, origCom, {}, 'success', id, o);
-						that._success.call(that, o.context || o, origSuc, cache[id], 'success', {}, o);
+						that._complete.call(that, o.context || o, origCom, cache[id], 'success', id, o);
+						that._success.call(that, o.context || o, origSuc, cache[id]._successData, 'success', cache[id], o);
 					}, 0);
 				} else {
 					if (o.async) {
@@ -189,7 +189,24 @@
 				});
 			}
 			if(o.cacheResponse && !cache[o.xhrID]){
-				cache[o.xhrID] = data;
+				var responseHeaders = xhr.getAllResponseHeaders();
+				
+				cache[o.xhrID] = {
+					status: xhr.status,
+					statusText: xhr.statusText,
+					responseText: xhr.responseText,
+					responseXML: xhr.responseXML,
+					_successData: data,
+					getAllResponseHeaders: function() {return responseHeaders;},
+					getResponseHeader: (function(){
+						var parsedHeaders = {};
+						$.each(responseHeaders.split("\n"), function(i, headerLine){
+							var delimiter = headerLine.indexOf(":");
+		                    parsedHeaders[headerLine.substr(0, delimiter)] = headerLine.substr(delimiter + 2);
+						});
+						return function(name) {return parsedHeaders[name];};
+					}())
+				};
 			}
 			origFn.call(context, data, status, xhr, o);
 			$.event.trigger(this.name +'AjaxSuccess', [xhr, o, data]);
