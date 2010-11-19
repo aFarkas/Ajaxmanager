@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.06
+ * @version 3.07
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -196,18 +196,23 @@
 					responseXML: xhr.responseXML,
 					_successData: data
 				};
-				if(xhr.getAllResponseHeaders){
+				if('getAllResponseHeaders' in xhr){
 					var responseHeaders = xhr.getAllResponseHeaders();
+					var parsedHeaders;
+					var parseHeaders = function(){
+						if(parsedHeaders){return;}
+						parsedHeaders = {};
+						$.each(responseHeaders.split("\n"), function(i, headerLine){
+							var delimiter = headerLine.indexOf(":");
+		                    parsedHeaders[headerLine.substr(0, delimiter)] = headerLine.substr(delimiter + 2);
+						});
+					};
 					$.extend(cache[o.xhrID], {
 						getAllResponseHeaders: function() {return responseHeaders;},
-						getResponseHeader: (function(){
-							var parsedHeaders = {};
-							$.each(responseHeaders.split("\n"), function(i, headerLine){
-								var delimiter = headerLine.indexOf(":");
-			                    parsedHeaders[headerLine.substr(0, delimiter)] = headerLine.substr(delimiter + 2);
-							});
-							return function(name) {return parsedHeaders[name];};
-						}())
+						getResponseHeader: function(name) {
+							parseHeaders();
+							return (name in parsedHeaders) ? parsedHeaders[name] : null;
+						}
 					});
 				}
 			}
