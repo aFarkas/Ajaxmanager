@@ -12,11 +12,14 @@
                 margin: 10px;
             }
         </style>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
         <script src="../../js/jquery.chili.pack.js" type="text/javascript"></script>
         <script type="text/javascript"> 
-            ChiliBook.recipeFolder     = "../../css/chili/";  
-            ChiliBook.stylesheetFolder = "../../css/chili/";  
+			(function(){
+				if(!window.ChiliBook){return;}
+	            ChiliBook.recipeFolder     = "../../css/chili/";  
+	            ChiliBook.stylesheetFolder = "../../css/chili/";  
+			})();
         </script> 
         <script src="jquery.ajaxmanager.js"></script>
 		

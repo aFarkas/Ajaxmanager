@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.07
+ * @version RC3.08
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -147,13 +147,16 @@
 			this.requests[xhrID] = null;
 			delete this.requests[xhrID];
 		},
-		_isAbort: function(xhr, o){
-			var ret = !!( o.abortIsNoSuccess && ( !xhr || xhr.readyState === 0 || this.lastAbort === o.xhrID ) );
+		_isAbort: function(xhr, status, o){
+			if(!o.abortIsNoSuccess || (!xhr && !status)){
+				return false;
+			}
+			var ret = !!(  ( !xhr || xhr.readyState === 0 || this.lastAbort === o.xhrID ) );
 			xhr = null;
 			return ret;
 		},
 		_complete: function(context, origFn, xhr, status, xhrID, o){
-			if(this._isAbort(xhr, o)){
+			if(this._isAbort(xhr, status, o)){
 				status = 'abort';
 				o.abort.call(context, xhr, status, o);
 			}
@@ -176,7 +179,7 @@
 		},
 		_success: function(context, origFn, data, status, xhr, o){
 			var that = this;
-			if(this._isAbort(xhr, o)){
+			if(this._isAbort(xhr, status, o)){
 				xhr = null;
 				return;
 			}
