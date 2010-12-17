@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version RC3.08
+ * @version RC3.09
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -58,7 +58,14 @@
 				that 		= this,
 				ajaxFn 		= this._createAjax(xhrID, o, origSuc, origCom)
 			;
-			
+			if(o.preventDoubbleRequests && o.queueDuplicateRequests){
+				if(o.preventDoubbleRequests){
+					o.queueDuplicateRequests = false;
+				}
+				setTimeout(function(){
+					throw("preventDoubbleRequests and queueDuplicateRequests can't be both true");
+				}, 0);
+			}
 			if(this.requests[xhrID] && o.preventDoubbleRequests){
 				return;
 			}
@@ -106,9 +113,9 @@
 				$(document).clearQueue(this.qName);
 			}
 			
-			if(o.queue){
+			if(o.queue || (o.queueDuplicateRequests && this.requests[xhrID])){
 				$.queue(document, this.qName, ajaxFn);
-				if(this.inProgress < o.maxRequests){
+				if(this.inProgress < o.maxRequests && (!this.requests[xhrID] || !o.queueDuplicateRequests)){
 					$.dequeue(document, this.qName);
 				}
 				return xhrID;
@@ -124,12 +131,17 @@
 					$.event.trigger(that.name +'AjaxStart');
 				}
 				if(o.cacheResponse && cache[id]){
-					that.requests[id] = {};
-					setTimeout(function(){
-						that._complete.call(that, o.context || o, origCom, cache[id], 'success', id, o);
-						that._success.call(that, o.context || o, origSuc, cache[id]._successData, 'success', cache[id], o);
-					}, 0);
-				} else {
+					if(!cache[id].cacheTTL || cache[id].cacheTTL < 0 || ((new Date().getTime() - cache[id].timestamp) < cache[id].cacheTTL)){
+                        that.requests[id] = {};
+                        setTimeout(function(){
+                           that._complete.call(that, o.context || o, origCom, cache[id], 'success', id, o);
+							that._success.call(that, o.context || o, origSuc, cache[id]._successData, 'success', cache[id], o);
+                        }, 0);
+                    } else {
+						 delete cache[id];
+					}
+				} 
+				if(!o.cacheResponse || !cache[id]) {
 					if (o.async) {
 						that.requests[id] = $.ajax(o);
 					} else {
@@ -140,13 +152,16 @@
 			};
 		},
 		_removeXHR: function(xhrID){
-			if(this.opts.queue){
+			if(this.opts.queue || this.opts.queueDuplicateRequests){
 				$.dequeue(document, this.qName);
 			}
 			this.inProgress--;
 			this.requests[xhrID] = null;
 			delete this.requests[xhrID];
 		},
+		clearCache: function () {
+            cache = {};
+        },
 		_isAbort: function(xhr, status, o){
 			if(!o.abortIsNoSuccess || (!xhr && !status)){
 				return false;
@@ -197,7 +212,9 @@
 					statusText: xhr.statusText,
 					responseText: xhr.responseText,
 					responseXML: xhr.responseXML,
-					_successData: data
+					_successData: data,
+					cacheTTL: o.cacheTTL, 
+					timestamp: new Date().getTime()
 				};
 				if('getAllResponseHeaders' in xhr){
 					var responseHeaders = xhr.getAllResponseHeaders();
@@ -292,6 +309,8 @@
 		domCompleteTrigger: false,
 		domSuccessTrigger: false,
 		preventDoubbleRequests: true,
+		queueDuplicateRequests: false,
+		cacheTTL: -1,
 		queue: false // true, false, clear
 	};
 	
