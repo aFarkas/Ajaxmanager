@@ -2,12 +2,13 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version RC3.09
+ * @version 3.09
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
 
 (function($){
+	"use strict";
 	var managed = {},
 		cache   = {}
 	;
