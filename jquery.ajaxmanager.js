@@ -2,7 +2,7 @@
  * project-site: http://plugins.jquery.com/project/AjaxManager
  * repository: http://github.com/aFarkas/Ajaxmanager
  * @author Alexander Farkas
- * @version 3.09
+ * @version 3.10
  * Copyright 2010, Alexander Farkas
  * Dual licensed under the MIT or GPL Version 2 licenses.
  */
@@ -135,8 +135,8 @@
 					if(!cache[id].cacheTTL || cache[id].cacheTTL < 0 || ((new Date().getTime() - cache[id].timestamp) < cache[id].cacheTTL)){
                         that.requests[id] = {};
                         setTimeout(function(){
-                           that._complete.call(that, o.context || o, origCom, cache[id], 'success', id, o);
 							that._success.call(that, o.context || o, origSuc, cache[id]._successData, 'success', cache[id], o);
+                        	that._complete.call(that, o.context || o, origCom, cache[id], 'success', id, o);
                         }, 0);
                     } else {
 						 delete cache[id];
@@ -208,6 +208,9 @@
 				});
 			}
 			if(o.cacheResponse && !cache[o.xhrID]){
+				if(!xhr){
+					xhr = {};
+				}
 				cache[o.xhrID] = {
 					status: xhr.status,
 					statusText: xhr.statusText,
