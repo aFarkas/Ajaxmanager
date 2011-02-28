@@ -12,7 +12,7 @@
                 margin: 10px;
             }
         </style>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
         <script src="../../js/jquery.chili.pack.js" type="text/javascript"></script>
         <script type="text/javascript"> 
 			(function(){
@@ -128,7 +128,7 @@
 						$.manageAjax.clear('lifo-cache', true);
 					});
                 
-                var d = $.manageAjax.create('cache', {queue: false, cacheResponse: true, preventDoubbleRequests: false});
+                var d = $.manageAjax.create('cache', {queue: false, cacheResponse: true, preventDoubleRequests: false});
                 $('#region4 a').click(function(){
                    var $this = $(this);
                    d.add({
@@ -164,7 +164,7 @@
 	<li>abort: (function): callback, that will be called, if a XHR is aborted.</li>
 	<li>beforeCreate ([function]): a function that will be called, before the XHR-object is created. If you return false, the XHR won´t be created.</li>
     <li>maxRequests: (number (<strong>1</strong>)) limits the number of simultaneous request in the queue. queue-option must be true or 'clear'.</li>
-    <li>preventDoubbleRequests (<strong>true</strong>|false): prevents multiple equal requests (compares url, data and type)</li>
+    <li>preventDoubleRequests (<strong>true</strong>|false): prevents multiple equal requests (compares url, data and type)</li>
 	<li>cacheResponse (true|<strong>false</strong>): caches the response data of succesfull responses (not the xhr-object!)</li>
 	<li>domCompleteTrigger (<strong>false</strong>| DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the events uniqueName + "DOMComplete" and "DOMComplete"  on the specified element.</li>
 	<li>domSuccessTrigger (<strong>false</strong> | DOM-Element, DOMNodelist, Selector or jQuery-List). Triggers the events uniqueName + "DOMSuccess" and "DOMSuccess" on the specified element.</li>
@@ -353,7 +353,7 @@ $.manageAjax.add('clearQueue', {
 	<button class="clear">clear</button> <button class="abort">abort</button> <button class="clear-abort">clear + abort</button> 
 </div>
 <div id="region4" class="box">
-    <h2>{queue: false, cacheResponse: true, preventDoubbleRequests: false}</h2>
+    <h2>{queue: false, cacheResponse: true, preventDoubleRequests: false}</h2>
     <ul></ul>
     <a href="0.html">0 second delay</a> | <a href="1.php">1 second delay</a> | <a href="2.php">2 seconds delay</a> | <a href="3.php">3 secounds delay</a> | 
 	<button class="abort">abort</button>
